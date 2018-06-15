@@ -1183,6 +1183,7 @@ def tutorials_pending(request):
     else:
         raise PermissionDenied()
 
+
 @login_required
 def admin_review_index(request):
     if not is_videoreviewer(request.user):
@@ -1211,6 +1212,7 @@ def admin_review_index(request):
         return render(request, 'creation/templates/admin_review_index.html', context)
     except Exception, e:
         return e
+
 
 @login_required
 def admin_review_video(request, trid):
@@ -1266,6 +1268,34 @@ def admin_review_video(request, trid):
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/admin_review_video.html', context)
+
+@csrf_exempt
+@login_required
+def testimonial_review(request):
+    if not is_videoreviewer(request.user):
+        raise PermissionDenied()
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            if data['action'] == 1:
+                VideoTestimonial.objects.filter(id=data['id']).update(location=data['location'], admin_reviewed=True)
+            elif data['action'] == 0:
+                VideoTestimonial.objects.get(id=data['id']).delete()
+            else:
+                raise Exception('Action does not exist!')
+            return HttpResponse("Done")
+        except Exception as error:
+            # Logging needed desprately
+            print error
+            return HttpResponse("Not-done")
+    new_testimonials = VideoTestimonial.objects.filter(admin_reviewed=False).values_list('foss_id__foss', 'location', 'admin_reviewed', 'id','embed')
+    context = {
+        'testimonials': new_testimonials,
+        'media_url': settings.MEDIA_URL,
+    }
+    context.update(csrf(request))
+    return render(request, 'creation/templates/testimonial_review.html', context)
+
 
 @login_required
 def admin_reviewed_video(request):

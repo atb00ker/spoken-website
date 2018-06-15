@@ -12,13 +12,12 @@
        position: relative;
        margin-bottom: 2px;
    }
-   #st_video_title {
-    text-align: center;
-    margin-top: 25px;
-    margin-bottom: 25px;
-    font-weight: 800;
-    font-size: 27px;
+   h3.page-title {
+    font-size: 22px;
+    margin: 10px 0 20px 0;
+    font-family: 'Oswald';
    }
+
 </style>
 <div class="well tab-content tutorial-search-form col-lg-offset-1 col-md-offset-1 col-lg-10 col-md-10 col-sm-12 col-xs-12">
     <div class="col-sm-12">
@@ -54,13 +53,14 @@
 </div>
 
 <div class="row">
+    <h3 class="col-lg-12 col-md-12 col-sm-12 page-title">Testimonials</h3>
     {% for td_row in td %}
-        <div class='col-xs-12' id='st_video_title'> {{ td_row.0.0 }}</div>
-        {% for td_row_elements in td_row %}
+    <h4 class='col-xs-12 col-md-12 col-sm-12 page-title'> {{ td_row.0.0 }}</h4>
+    {% for td_row_elements in td_row %}
             <div class='col-sm-6'>
                 {% if td_row_elements.2 == False %}
                 <video id="st_video" title='{{ td_row_elements.0 }}' controls preload data-setup="{}">
-                        <source src="{{ media_url }}/{{ td_row_elements.1 }}" type="video/mp4" />
+                        <source src="{{ media_url }}{{ td_row_elements.1 }}" type="video/mp4" />
                 </video>
                 {% else %}
                 <iframe id='st_video' src="{{ td_row_elements.1 }}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>

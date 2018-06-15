@@ -1,0 +1,218 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %}Admin review{% endblock %}
+{% block heading %}<i class="fa fa-list-ul"></i> Testimonial review{% endblock %}
+{% block content %}
+<style>
+/* The Modal (background) */
+#modal_container {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+#modal_content {
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 55%;
+    height: 95%;
+}
+
+/* The Close Button */
+#model_close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+#model_close:hover,
+#model_close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+audio, canvas, progress, video {
+    display: block;
+}
+#modal_video {
+    margin: 10px;
+}
+.btn {
+    margin: 0;
+    padding:0;
+    padding: 5px;
+    margin-top: 8px;
+    margin-left: 5px;
+}
+</style>
+<ul class="breadcrumb">
+    <li><a href="/creation/admin-review/">Tutorials waiting for Admin review</li>
+    <li><a href="/creation/admin-review/reviewed/">Tutorials Reviewed</a></li>
+    <li class="active">Testimonial review</li>
+</ul>
+<div class="table-responsive">
+    <table class="paleblue table table-condensed table-bordered table-hover">
+        {% if not testimonials|length %}
+        <tr>
+            <td colspan="6" class="col-center">List is empty</td>
+        </tr>
+        {% else %}
+        <thead>
+            <tr>
+                <th >S.No</th>
+                <th>Name</th>
+                <th >Review</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 
+                Testimonial contains values from the testimonial table
+                'foss_id__foss': testimonial.0
+                'location': testimonial.1
+                'admin_reviewed':  testimonial.2
+                'id': testimonial.3
+                'embed': testimonial.4
+            -->
+            {% for testimonial in testimonials %}
+            {% if not testimonial.2 %}
+            <tr>
+                <td >{{ forloop.counter }}</td>
+                <td>{{ testimonial.0 }}</td>
+                <td class="col-center"><a class='review_btn' onclick="review_request('{{ testimonial.4 }}', '{{ testimonial.1 }}', '{{ testimonial.3 }}')"><span title="" data-original-title="" class="fa fa-cog fa-2"></span> Review</a></td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+        {% endif %}
+    </table>
+    <div id="modal_container">
+        <div id="modal_content">
+            <span id='model_close'>&times;</span>
+            <div id='modal_video' class="video-container col-lg-12 col-md-12 col-sm-12"></div>
+            <div id='modal_table'></div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+{% block compressinlinejsblock %}
+    <script type="text/javascript">
+        $(document).ready(
+            function(){
+                $(".review_btn").hover(
+                    function () {
+                        $(this).children(0).addClass("fa-spin");
+                    },
+                    function () {
+                        $(this).children(0).removeClass("fa-spin");
+                    }
+                );
+            }
+        );
+
+        var modal_container = document.getElementById('modal_container'),
+            model_close = document.getElementById('model_close'),
+            model_video = document.getElementById('modal_video');
+            model_table = document.getElementById('modal_table');
+        model_close.onclick = function() {
+            modal_video.innerHTML = '';
+            modal_container.style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == modal_container) {
+                modal_video.innerHTML = '';
+                modal_container.style.display = "none";
+            }
+        }
+
+        function review_request(embed, location, id) {
+            if (embed == "True") {
+                model_video.innerHTML = '<iframe id="st_video_container" width="750" height="450" src="'+ location + 
+                '"frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+               model_table.innerHTML = '<div class="row"><div class="col-xs-12"><input id="location_input" class="form-control" disabled type="text" name="location" value="' + location + '"/></div></div>';
+                model_table.innerHTML += '<div class="col-xs-7"></div>';
+                model_table.innerHTML += '<button class="col-xs-1 btn btn-primary" onclick="copyLocation()">Copy</button>';
+                model_table.innerHTML += '<button id="edit_btn" class="col-xs-1 btn btn-warning" onclick="enableEdit(0)">Edit</button>';
+                model_table.innerHTML += '<button class="col-xs-1 btn btn-success" onclick="request_change(1,'+ id + ')">Accept</button>';
+                model_table.innerHTML += '<button class="col-xs-1 btn btn-danger" onclick="request_change(0,'+ id + ')">Reject</button>';
+            }
+            else {
+                model_video.innerHTML = '<video id="st_video_container" width="750" height="450" controls preload="auto" data-setup="{}">' +
+                    '<source src="{{ media_url }}'+location+'" type="video/mp4" />' +
+                '</video>';
+                model_table.innerHTML = '<input style="display: none;" id="location_input" disabled type="text" name="location" value="' + location + '"/>';
+                model_table.innerHTML += '<div class="col-xs-9"></div>';
+                model_table.innerHTML += '<button class="col-xs-1 btn btn-success" onclick="request_change(1,'+ id + ')">Accept</button>';
+                model_table.innerHTML += '<button class="col-xs-1 btn btn-danger" onclick="request_change(0,'+ id + ')">Reject</button>';
+            }    
+            modal_container.style.display = "block";
+        }
+        
+        
+        // Model actions
+        function copyLocation() {
+            var copyText = document.getElementById("location_input");
+            copyText.disabled=false;
+            copyText.select();
+            document.execCommand("copy");
+            alert("Copied video path");
+            copyText.disabled=true;
+        }
+
+        function enableEdit(action) {
+            var inputText = document.getElementById("location_input"),
+                editBtn = document.getElementById("edit_btn"),
+                st_testimonial_video = document.getElementById("st_video_container");
+            if (action == 1) {
+                inputText.disabled=true;
+                editBtn.setAttribute( "onClick", "javascript:enableEdit(0);" );
+                st_testimonial_video.src = inputText.value;
+                editBtn.innerHTML = 'Edit';
+            } else {
+                inputText.disabled=false;
+                editBtn.setAttribute( "onClick", "javascript:enableEdit(1);" );
+                editBtn.innerHTML = 'Save';
+            }
+        }
+
+        function request_change(status, id) {
+            var inputText = document.getElementById("location_input");
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    if (xhttp.responseText == "Done") {
+                        window.location.reload()
+                    } else {
+                        if (confirm("Some error occured, please try again.")) {
+                            window.location.reload();
+                        } else {
+                            window.location = '{% url "creation:creationhome" %}';
+                        }
+                    }
+                }
+            };
+            xhttp.open("POST", "{% url 'creation:testimonial_review' %}", true);
+            var parameters = '{"action":' + status +
+                            ',"id":' +  id +
+                            ',"location":"' +  inputText.value +
+                            '"}';
+            xhttp.send(parameters);
+        }
+    </script>
+{% endblock %}

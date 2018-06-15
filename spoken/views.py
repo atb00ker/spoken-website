@@ -163,7 +163,7 @@ def tutorial_search(request):
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL
     context['current_foss'] = foss_get
-    return render(request, 'spokenSeriesTutorialSearchForm/templates/tutorial_search.html', context)
+    return render(request, 'spoken/templates/tutorial_search.html', context)
 
 def list_videos(request):
     form = TutorialSearchForm()
@@ -176,7 +176,7 @@ def series_foss(request):
     foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage = False).values('tutorial_detail__foss__id','tutorial_detail__foss__id' ).annotate().distinct()
     testimonial_display = []
     for foss in foss_list:
-        testimonial_display.append(VideoTestimonial.objects.filter(foss__id=foss['tutorial_detail__foss__id']).exclude(location__exact='').values_list('foss__foss', 'location','embed'))
+        testimonial_display.append(VideoTestimonial.objects.filter(foss__id=foss['tutorial_detail__foss__id'], admin_reviewed=True).exclude(location__exact='').values_list('foss__foss', 'location','embed'))
     context = {}
     context['form'] = form
     context['td'] = testimonial_display

@@ -52,8 +52,9 @@ class FossCategory(models.Model):
 
 class VideoTestimonial(models.Model):
     foss = models.ForeignKey(FossCategory)
-    location = models.CharField(max_length=255, unique=True)
+    location = models.CharField(max_length=2083)
     embed = models.BooleanField()
+    admin_reviewed = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'Video Testimonial'
@@ -328,7 +329,7 @@ class AdminReviewerNotification(models.Model):
     user = models.ForeignKey(User)
     title = models.CharField(max_length=255)
     message = models.TextField()
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    tutorial_resource = models.ForeignKey(TutorialResource, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
 

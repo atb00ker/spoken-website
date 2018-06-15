@@ -32,6 +32,7 @@ urlpatterns = patterns('',
     url(r'^admin-review/$', 'creation.views.admin_review_index', name="admin_review_index"),
     url(r'^admin-review/reviewed/$', 'creation.views.admin_reviewed_video', name="admin_reviewed_video"),
     url(r'^admin-review/video/(\d+)/$', 'creation.views.admin_review_video', name="admin_review_video"),
+    url(r'^admin-review/testimonial_review/$', 'creation.views.testimonial_review', name="testimonial_review"),
 
     # Domain Reviewer part
     url(r'^domain-review/$', 'creation.views.domain_review_index', name="domain_review_index"),
